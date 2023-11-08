@@ -12,6 +12,9 @@ const SearchCompanies = () => {
   const [name, setName] = useState('');
   const [boycott, setBoycott] = useState('No'); // Default to 'No'
   const [url, setUrl] = useState('');
+  
+  const [compName, setCompName] = useState('');
+
 
   const handleSearch = async (searchText) => {
     setSearch(searchText);
@@ -34,7 +37,8 @@ const SearchCompanies = () => {
     setSuggestions([]); // Clear the suggestions when opening the modal
     setCompID(company.id);
     setName(company.name);
-    setBoycott(company.boycott);
+    setCompName(company.name)
+    setBoycott(company.boycott === true ? "Yes" : "No");
     setUrl(company.url);
     setSearch('');
   };
@@ -48,28 +52,51 @@ const SearchCompanies = () => {
   const handleEdit = async () => {
     // eslint-disable-next-line no-restricted-globals
     if (confirm('Confirm Edit?') === true) {
-      try {
-        // Query Firestore to check if the new name already exists
-        const querySnapshot = await getDocs(
-          query(collection(db, 'companies'), where('name', '==', name))
-        );
-  
-        if (querySnapshot.size === 0) {
-          // No existing document with the same name found, proceed with the update
+      if (name !== compName) {
+        try {
+
+          // Query Firestore to check if the new name already exists
+          const querySnapshot = await getDocs(
+            query(collection(db, 'companies'), where('name', '==', name))
+          );
+    
+          if (querySnapshot.size === 0) {
+            // No existing document with the same name found, proceed with the update
+            await updateDoc(doc(db, 'companies', compID), {
+              name: name,
+              boycott: boycott === ('Yes' || 'yes') ? true : false,
+              url: url,
+            });
+            setIsModalOpen(false);
+            alert('Company Details Updated!');
+          } else {
+            // A document with the same name already exists, show an error message
+            alert('Company with the same name already exists!');
+          }
+        } catch (error) {
+          console.error(error);
+        }
+      } else if (name === compName) {
+        
+        try {
+          console.log(name);
+          console.log(compName);
+          console.log(boycott);
+
           await updateDoc(doc(db, 'companies', compID), {
             name: name,
-            boycott: boycott === 'Yes' || 'yes' ? true : false,
+            boycott: boycott === ('Yes' || 'yes') ? true : false,
             url: url,
           });
           setIsModalOpen(false);
           alert('Company Details Updated!');
-        } else {
-          // A document with the same name already exists, show an error message
-          alert('Company with the same name already exists!');
+
+        } catch (error) {
+          console.error(error);
         }
-      } catch (error) {
-        console.error(error);
+
       }
+      
     }
   };
   

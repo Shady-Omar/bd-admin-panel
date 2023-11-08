@@ -36,7 +36,7 @@ function PopupComponent() {
           // No document with the same name, so you can add a new one
           await addDoc(collection(db, "companies"), {
             name: name,
-            boycott: boycott === 'Yes' || 'yes' ? true : false,
+            boycott: boycott === ('Yes' || 'yes') ? true : false,
             url: url,
           });
           // console.log("Document written with ID: ", docRef.id);
