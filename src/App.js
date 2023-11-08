@@ -1,23 +1,19 @@
-import logo from './logo.svg';
 import './App.css';
+import ExcelFileUploader from './Components/ExcelFileUploader';
+import Navbar from './Components/Navbar';
+import SearchCompanies from './Components/SearchBar';
+import PopupComponent from './Components/addBtn';
 
 function App() {
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <Navbar/>
+      <div className='flex flex-row'>
+        <PopupComponent/>
+        <SearchCompanies/>
+      </div>
+      <h4 className='p-4 font-semibold text-xl text-left'>or</h4>
+      <ExcelFileUploader/>
     </div>
   );
 }
