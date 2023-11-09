@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { db } from '../firebase';
-import { collection, getDocs, query, where, doc, deleteDoc, updateDoc } from 'firebase/firestore';
+import { db } from '../firebase'
+import { collection, getDocs, query, where, doc, deleteDoc, updateDoc, onSnapshot } from 'firebase/firestore';
 
-const SearchCompanies = () => {
-  const [search, setSearch] = useState('');
-  const [suggestions, setSuggestions] = useState([]);
+const TableComponent = () => {
+  const [data, setData] = useState([]);
+
+
   const [selectedCompany, setSelectedCompany] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -12,42 +13,32 @@ const SearchCompanies = () => {
   const [name, setName] = useState('');
   const [boycott, setBoycott] = useState('No'); // Default to 'No'
   const [url, setUrl] = useState('');
-  
+
   const [compName, setCompName] = useState('');
 
-
-  const handleSearch = async (searchText) => {
-    setSearch(searchText);
-    if (searchText) {
-      // Query Firestore for companies with 'name' containing the searchText
-      const querySnapshot = await getDocs(
-        query(collection(db, 'companies'), where('name', '>=', searchText))
-      );
-
-      const companySuggestions = querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-      setSuggestions(companySuggestions);
-    } else {
-      setSuggestions([]);
-    }
-  };
-
-  const openModal = (company) => {
-    setSelectedCompany(company);
-    setIsModalOpen(true);
-    setSuggestions([]); // Clear the suggestions when opening the modal
-    setCompID(company.id);
-    setName(company.name);
-    setCompName(company.name)
-    setBoycott(company.boycott === true ? "Yes" : "No");
-    setUrl(company.url);
-    setSearch('');
-  };
-
   useEffect(() => {
-    if (!isModalOpen) {
-      setSelectedCompany(null);
-    }
-  }, [isModalOpen]);
+    const unsubscribe = onSnapshot(collection(db, 'companies'), (querySnapshot) => {
+      const documents = [];
+      querySnapshot.forEach((doc) => {
+        documents.push({ id: doc.id, ...doc.data() });
+      });
+      setData(documents);
+    });
+  
+    // Cleanup function to unsubscribe from the snapshot listener when the component unmounts
+    return () => unsubscribe();
+  }, []);
+  
+
+  const openModal = (item) => {
+    setSelectedCompany(item);
+    setIsModalOpen(true);
+    setCompID(item.id);
+    setName(item.name);
+    setCompName(item.name)
+    setBoycott(item.boycott === true ? "Yes" : "No");
+    setUrl(item.url);
+  };
 
   const handleEdit = async () => {
     // eslint-disable-next-line no-restricted-globals
@@ -90,7 +81,6 @@ const SearchCompanies = () => {
           });
           setIsModalOpen(false);
           alert('Company Details Updated!');
-
         } catch (error) {
           console.error(error);
         }
@@ -99,7 +89,6 @@ const SearchCompanies = () => {
       
     }
   };
-  
 
   const handleDelete = async () => {
     // eslint-disable-next-line no-restricted-globals
@@ -109,6 +98,24 @@ const SearchCompanies = () => {
         await deleteDoc(doc(db, "companies", compID));
         setIsModalOpen(false);
         alert('Company Deleted!');
+        // window.location.reload()
+      } catch (error) {
+        console.error(error);
+      }
+      
+    }
+  }
+
+  const handleTableDelete = async (itemId) => {
+    // eslint-disable-next-line no-restricted-globals
+    if (confirm('Are you sure you want to delete this company?') === true) {
+
+      try {
+        console.log(itemId);
+        await deleteDoc(doc(db, "companies", itemId));
+        setIsModalOpen(false);
+        alert('Company Deleted!');
+        // window.location.reload()
       } catch (error) {
         console.error(error);
       }
@@ -117,34 +124,54 @@ const SearchCompanies = () => {
   }
 
   return (
-    <div className="w-full max-w-md mx-auto p-4 relative">
-      <input
-        type="text"
-        placeholder="Search for companies..."
-        className="w-full p-2 rounded-lg shadow transition-colors border-gray-500 border-2 focus:outline-none focus:border-blue-500 focus:border-2"
-        value={search}
-        onChange={(e) => handleSearch(e.target.value)}
-      />
-      {suggestions.length > 0 && (
-        <ul className="mt-2 border rounded shadow-lg absolute z-10 bg-white w-full">
-          {suggestions.map((company) => (
-            <>
-              <li
-                key={company.id}
-                className="p-2 hover:bg-gray-100 cursor-pointer text-left pl-4"
-                onClick={() => openModal(company)}
-              >
-                {company.name}
-              </li>
-              <hr/>
-            </>
-            
-          ))}
-        </ul>
-      )}
-
+    <div className='flex justify-center mt-5 w-full relative' style={{zIndex: '1'}}>
+      <div className="relative overflow-x-auto shadow-md rounded-lg w-[95%]  ">
+        <table className="w-full text-sm text-left text-gray-400 rounded-lg">
+          <thead className="text-xs text-gray-400 uppercase bg-gray-700">
+            <tr>
+              <th scope="col" className="px-6 py-3">
+                Company name
+              </th>
+              <th scope="col" className="px-6 py-3">
+                Boycott
+              </th>
+              <th scope="col" className="px-6 py-3">
+                URL
+              </th>
+              <th scope="col" className="px-6 py-3">
+                Modify
+              </th>
+              <th scope="col" className="px-6 py-3">
+                
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {data.map((item) => (
+              <tr key={item.id} className="bg-gray-900" style={{borderBottom: '1px solid rgb(55 65 81)'}}>
+                <th scope="row" className="px-6 py-4 font-medium text-white whitespace-nowrap">
+                  {item.name}
+                </th>
+                <td className="px-6 py-4">{item.boycott === true ? 'Yes' : "No"}</td>
+                <td className="px-6 py-4">{item.url}</td>
+                <td className="px-6 py-4">
+                  <button onClick={() => openModal(item)} className="font-medium text-blue-500 hover:underline">
+                    Edit
+                  </button>
+                </td>
+                <td className="px-6 py-4">
+                  <button onClick={() => handleTableDelete(item.id)} className="font-medium text-blue-500 hover:underline">
+                    Delete
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      
       {isModalOpen && selectedCompany && (
-        <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50" style={{zIndex: '999'}}>
+        <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50">
 
           <div className="absolute bg-white w-2/3 md:w-1/3 p-4 rounded-lg shadow-lg z-10 flex flex-col ">
             <h2 className='font-bold mb-2'>Modify Company Details</h2>
@@ -203,8 +230,9 @@ const SearchCompanies = () => {
           </div>
         </div>
       )}
+
     </div>
   );
 };
 
-export default SearchCompanies;
+export default TableComponent;
