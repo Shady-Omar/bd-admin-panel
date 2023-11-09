@@ -9,11 +9,15 @@ function App() {
   return (
     <div className="App">
       <Navbar/>
-      <div className='flex flex-row items-start'>
-        <PopupComponent/>
-        <h4 className='p-4 font-semibold text-xl text-left'>or</h4>
-        <ExcelFileUploader/>
-        <SearchCompanies/>
+      <div className='flex flex-col md:flex-row items-start'>
+        <div className='w-full flex flex-row items-start'>
+          <PopupComponent/>
+          <h4 className='p-4 font-semibold text-xl text-left'>or</h4>
+          <ExcelFileUploader/>
+        </div>
+        <div className='w-full'>
+          <SearchCompanies/>
+        </div>
       </div>
       <hr/>
       <TableComponent/>

@@ -125,7 +125,7 @@ const TableComponent = () => {
 
   return (
     <div className='flex justify-center mt-5 w-full relative' style={{zIndex: '1'}}>
-      <div className="relative overflow-x-auto shadow-md rounded-lg w-[95%]  ">
+      <div className="relative overflow-x-auto shadow-md rounded-lg w-[95%]">
         <table className="w-full text-sm text-left text-gray-400 rounded-lg">
           <thead className="text-xs text-gray-400 uppercase bg-gray-700">
             <tr>

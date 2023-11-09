@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import * as XLSX from "xlsx"; // Import the 'xlsx' library
 import { db } from '../firebase'
-import { collection, addDoc, getDocs, query, where, writeBatch, doc } from "firebase/firestore";
+import { collection, getDocs, query, where, writeBatch, doc } from "firebase/firestore";
 
 function ExcelFileUploader() {
   const [fileData, setFileData] = useState(null);
@@ -67,7 +67,7 @@ function ExcelFileUploader() {
         type="file"
         accept=".xls, .xlsx"
         onChange={handleFileChange}
-        className="mt-2 border rounded p-2"
+        className="mt-2 border rounded p-2 w-[85%]"
       />
     </div>
   );
