@@ -130,7 +130,7 @@ const SearchCompanies = () => {
           {suggestions.map((company) => (
             <li
               key={company.id}
-              className="p-2 hover:bg-gray-100 cursor-pointer"
+              className="p-2 hover:bg-gray-100 cursor-pointer text-left pl-4"
               onClick={() => openModal(company)}
             >
               {company.name}
