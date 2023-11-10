@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { db } from '../firebase'
 import { collection, addDoc, getDocs, query, where } from "firebase/firestore";
 
-function PopupComponent() {
+function PopupComponent(props) {
   const [isOpen, setIsOpen] = useState(false);
   const [name, setName] = useState('');
   const [boycott, setBoycott] = useState('No'); // Default to 'No'
@@ -40,9 +40,10 @@ function PopupComponent() {
             url: url,
           });
           // console.log("Document written with ID: ", docRef.id);
-      
+          props.fetchCompanies();
           // Success message:
           alert('Company Added Successfully!');
+          
         }
       
         // Close the popup

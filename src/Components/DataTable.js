@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { db } from '../firebase'
 import { collection, getDocs, query, where, doc, deleteDoc, updateDoc, onSnapshot } from 'firebase/firestore';
 
-const TableComponent = () => {
+const TableComponent = (props) => {
   const [data, setData] = useState([]);
 
 
@@ -59,6 +59,7 @@ const TableComponent = () => {
               url: url,
             });
             setIsModalOpen(false);
+            props.fetchCompanies();
             alert('Company Details Updated!');
           } else {
             // A document with the same name already exists, show an error message
@@ -80,6 +81,7 @@ const TableComponent = () => {
             url: url,
           });
           setIsModalOpen(false);
+          props.fetchCompanies();
           alert('Company Details Updated!');
         } catch (error) {
           console.error(error);
@@ -97,6 +99,7 @@ const TableComponent = () => {
       try {
         await deleteDoc(doc(db, "companies", compID));
         setIsModalOpen(false);
+        props.fetchCompanies();
         alert('Company Deleted!');
         // window.location.reload()
       } catch (error) {

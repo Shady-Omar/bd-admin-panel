@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { db } from '../firebase';
 import { collection, getDocs, query, where, doc, deleteDoc, updateDoc } from 'firebase/firestore';
 
-const SearchCompanies = () => {
+const SearchCompanies = (props) => {
   const [search, setSearch] = useState('');
   const [suggestions, setSuggestions] = useState([]);
   const [selectedCompany, setSelectedCompany] = useState(null);
@@ -15,32 +15,20 @@ const SearchCompanies = () => {
   
   const [compName, setCompName] = useState('');
 
-  const [companies, setCompanies] = useState([]);
+  const [companiesData, setCompaniesData] = useState([]);
 
   useEffect(() => {
-    const fetchCompanies = async () => {
-      const companiesCollection = collection(db, 'companies');
-      const companiesSnapshot = await getDocs(companiesCollection);
+    setCompaniesData(props.companiesData);
+  }, [props.companiesData]);
 
-      const companiesData = companiesSnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
-
-      setCompanies(companiesData);
-    };
-    
-    fetchCompanies();
-  }, []);
-
-
+  
 
   const handleSearch = async (searchText) => {
     setSearch(searchText);
     if (searchText) {
 
       function queryCompanies(searchText) {
-        return companies.filter(company => company.name.toLowerCase().includes(searchText.toLowerCase()));
+        return companiesData.filter(company => company.name.toLowerCase().includes(searchText.toLowerCase()));
       }
 
       setSuggestions(queryCompanies(searchText));
@@ -86,6 +74,7 @@ const SearchCompanies = () => {
               url: url,
             });
             setIsModalOpen(false);
+            props.fetchCompanies();
             alert('Company Details Updated!');
           } else {
             // A document with the same name already exists, show an error message
@@ -107,6 +96,7 @@ const SearchCompanies = () => {
             url: url,
           });
           setIsModalOpen(false);
+          props.fetchCompanies();
           alert('Company Details Updated!');
 
         } catch (error) {
@@ -126,6 +116,7 @@ const SearchCompanies = () => {
       try {
         await deleteDoc(doc(db, "companies", compID));
         setIsModalOpen(false);
+        props.fetchCompanies();
         alert('Company Deleted!');
       } catch (error) {
         console.error(error);
@@ -146,17 +137,15 @@ const SearchCompanies = () => {
       {suggestions.length > 0 && (
         <ul className="mt-2 border rounded shadow-lg absolute z-10 bg-white w-full">
           {suggestions.map((company) => (
-            <>
+            <React.Fragment key={company.id}>
               <li
-                key={company.id}
                 className="p-2 hover:bg-gray-100 cursor-pointer text-left pl-4"
                 onClick={() => openModal(company)}
               >
                 {company.name}
               </li>
-              <hr/>
-            </>
-            
+              <hr />
+            </React.Fragment>
           ))}
         </ul>
       )}
