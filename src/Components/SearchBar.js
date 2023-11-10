@@ -15,17 +15,35 @@ const SearchCompanies = () => {
   
   const [compName, setCompName] = useState('');
 
+  const [companies, setCompanies] = useState([]);
+
+  useEffect(() => {
+    const fetchCompanies = async () => {
+      const companiesCollection = collection(db, 'companies');
+      const companiesSnapshot = await getDocs(companiesCollection);
+
+      const companiesData = companiesSnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+
+      setCompanies(companiesData);
+    };
+    
+    fetchCompanies();
+  }, []);
+
+
 
   const handleSearch = async (searchText) => {
     setSearch(searchText);
     if (searchText) {
-      // Query Firestore for companies with 'name' containing the searchText
-      const querySnapshot = await getDocs(
-        query(collection(db, 'companies'), where('name', '>=', searchText))
-      );
 
-      const companySuggestions = querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-      setSuggestions(companySuggestions);
+      function queryCompanies(searchText) {
+        return companies.filter(company => company.name.toLowerCase().includes(searchText.toLowerCase()));
+      }
+
+      setSuggestions(queryCompanies(searchText));
     } else {
       setSuggestions([]);
     }
