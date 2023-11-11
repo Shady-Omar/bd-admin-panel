@@ -3,7 +3,7 @@ import * as XLSX from "xlsx"; // Import the 'xlsx' library
 import { db } from '../firebase'
 import { collection, getDocs, query, where, writeBatch, doc } from "firebase/firestore";
 
-function ExcelFileUploader({ companies }) {
+function ExcelFileUploader() {
   const [fileData, setFileData] = useState(null);
 
 
@@ -25,9 +25,8 @@ function ExcelFileUploader({ companies }) {
           const batch = writeBatch(db);
 
           for (const row of sheetData) {
-            const companyAlreadyExist = companies.find(company => company.name === row.name);
-
-            if (!companyAlreadyExist) {
+            const querySnapshot = await getDocs(query(collection(db, "companies"), where("name", "==", row.name)));
+            if (querySnapshot.empty) {
               const newDocRef = doc(collection(db, "companies"));
               const bycottString = row.boycott.toLowerCase();
               batch.set(newDocRef, {
