@@ -10,39 +10,43 @@ import { collection, getDocs } from 'firebase/firestore';
 
 function App() {
 
-  const [companies, setCompanies] = useState([]);
+  // const [companies, setCompanies] = useState([]);
 
-  const fetchCompanies = async () => {
-    const companiesCollection = collection(db, 'companies');
-    const companiesSnapshot = await getDocs(companiesCollection);
+  // const fetchCompanies = async () => {
+  //   const companiesCollection = collection(db, 'companies');
+  //   const companiesSnapshot = await getDocs(companiesCollection);
 
-    const companiesData = companiesSnapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }));
+  //   const companiesData = companiesSnapshot.docs.map(doc => ({
+  //     id: doc.id,
+  //     ...doc.data()
+  //   }));
 
-    setCompanies(companiesData);
-  };
+  //   setCompanies(companiesData);
+  // };
 
-  useEffect(() => {
-    fetchCompanies();
-  }, []);
+  // useEffect(() => {
+  //   fetchCompanies();
+  // }, []);
 
   return (
     <div className="App">
       <Navbar />
       <div className='flex flex-col md:flex-row items-start'>
         <div className='w-full flex flex-row items-start'>
-          <PopupComponent fetchCompanies={fetchCompanies} />
+          {/* <PopupComponent fetchCompanies={fetchCompanies} /> */}
+          <PopupComponent />
           <h4 className='p-4 font-semibold text-xl text-left'>or</h4>
-          <ExcelFileUploader companies={companies} />
+          {/* <ExcelFileUploader companies={companies} /> */}
+          <ExcelFileUploader />
         </div>
         <div className='w-full'>
-          <SearchCompanies fetchCompanies={fetchCompanies} companiesData={companies} />
+          {/* <SearchCompanies fetchCompanies={fetchCompanies} companiesData={companies} /> */}
+          <SearchCompanies />
         </div>
       </div>
       <hr />
-      <TableComponent fetchCompanies={fetchCompanies} />
+      {/* <TableComponent fetchCompanies={fetchCompanies} /> */}
+      <TableComponent />
     </div>
   );
 }
