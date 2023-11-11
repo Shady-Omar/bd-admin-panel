@@ -12,7 +12,7 @@ const SearchCompanies = (props) => {
   const [name, setName] = useState('');
   const [boycott, setBoycott] = useState('No'); // Default to 'No'
   const [url, setUrl] = useState('');
-  
+
   const [compName, setCompName] = useState('');
 
   const [companiesData, setCompaniesData] = useState([]);
@@ -21,14 +21,14 @@ const SearchCompanies = (props) => {
     setCompaniesData(props.companiesData);
   }, [props.companiesData]);
 
-  
+
 
   const handleSearch = async (searchText) => {
     setSearch(searchText);
     if (searchText) {
 
       function queryCompanies(searchText) {
-        return companiesData.filter(company => company.name.toLowerCase().includes(searchText.toLowerCase()));
+        return companiesData.filter(company => company.name.toString().toLowerCase().includes(searchText.toLowerCase()));
       }
 
       setSuggestions(queryCompanies(searchText));
@@ -65,7 +65,7 @@ const SearchCompanies = (props) => {
           const querySnapshot = await getDocs(
             query(collection(db, 'companies'), where('name', '==', name))
           );
-    
+
           if (querySnapshot.size === 0) {
             // No existing document with the same name found, proceed with the update
             await updateDoc(doc(db, 'companies', compID), {
@@ -84,7 +84,7 @@ const SearchCompanies = (props) => {
           console.error(error);
         }
       } else if (name === compName) {
-        
+
         try {
           console.log(name);
           console.log(compName);
@@ -104,10 +104,10 @@ const SearchCompanies = (props) => {
         }
 
       }
-      
+
     }
   };
-  
+
 
   const handleDelete = async () => {
     // eslint-disable-next-line no-restricted-globals
@@ -121,7 +121,7 @@ const SearchCompanies = (props) => {
       } catch (error) {
         console.error(error);
       }
-      
+
     }
   }
 
@@ -151,7 +151,7 @@ const SearchCompanies = (props) => {
       )}
 
       {isModalOpen && selectedCompany && (
-        <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50" style={{zIndex: '999'}}>
+        <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50" style={{ zIndex: '999' }}>
 
           <div className="absolute bg-white w-2/3 md:w-1/3 p-4 rounded-lg shadow-lg z-10 flex flex-col ">
             <h2 className='font-bold mb-2'>Modify Company Details</h2>

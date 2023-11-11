@@ -30,19 +30,19 @@ function App() {
 
   return (
     <div className="App">
-      <Navbar/>
+      <Navbar />
       <div className='flex flex-col md:flex-row items-start'>
         <div className='w-full flex flex-row items-start'>
-          <PopupComponent fetchCompanies={fetchCompanies}/>
+          <PopupComponent fetchCompanies={fetchCompanies} />
           <h4 className='p-4 font-semibold text-xl text-left'>or</h4>
-          <ExcelFileUploader/>
+          <ExcelFileUploader companies={companies} />
         </div>
         <div className='w-full'>
-          <SearchCompanies fetchCompanies={fetchCompanies} companiesData={companies}/>
+          <SearchCompanies fetchCompanies={fetchCompanies} companiesData={companies} />
         </div>
       </div>
-      <hr/>
-      <TableComponent fetchCompanies={fetchCompanies}/>
+      <hr />
+      <TableComponent fetchCompanies={fetchCompanies} />
     </div>
   );
 }
