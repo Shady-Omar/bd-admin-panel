@@ -10,41 +10,49 @@ import { collection, getDocs, query, limit } from 'firebase/firestore';
 
 function App() {
 
-  const [companies, setCompanies] = useState([]);
+  // const [companies, setCompanies] = useState([]);
+
 
   const fetchCompanies = async () => {
     const companiesCollection = collection(db, 'companies');
 
     const companiesSnapshot = await getDocs(query(companiesCollection, limit(10)));
 
-    const companiesData = companiesSnapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }));
 
-    setCompanies(companiesData);
-  };
+  //   const companiesData = companiesSnapshot.docs.map(doc => ({
+  //     id: doc.id,
+  //     ...doc.data()
+  //   }));
+
+  //   setCompanies(companiesData);
+  // };
+
 
 
   useEffect(() => {
     fetchCompanies();
   }, []);
 
+
   return (
     <div className="App">
       <Navbar />
       <div className='flex flex-col md:flex-row items-start'>
         <div className='w-full flex flex-row items-start'>
-          <PopupComponent fetchCompanies={fetchCompanies} />
+          {/* <PopupComponent fetchCompanies={fetchCompanies} /> */}
+          <PopupComponent />
           <h4 className='p-4 font-semibold text-xl text-left'>or</h4>
+
           <ExcelFileUploader />
         </div>
         <div className='w-full'>
           <SearchCompanies fetchCompanies={fetchCompanies} />
+
         </div>
       </div>
       <hr />
-      <TableComponent fetchCompanies={fetchCompanies} />
+      {/* <TableComponent fetchCompanies={fetchCompanies} /> */}
+      <TableComponent />
     </div>
   );
 }
