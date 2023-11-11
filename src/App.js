@@ -6,15 +6,18 @@ import Navbar from './Components/Navbar';
 import SearchCompanies from './Components/SearchBar';
 import PopupComponent from './Components/addBtn';
 import { db } from './firebase'
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, getDocs, query, limit } from 'firebase/firestore';
 
 function App() {
 
   // const [companies, setCompanies] = useState([]);
 
-  // const fetchCompanies = async () => {
-  //   const companiesCollection = collection(db, 'companies');
-  //   const companiesSnapshot = await getDocs(companiesCollection);
+
+  const fetchCompanies = async () => {
+    const companiesCollection = collection(db, 'companies');
+
+    const companiesSnapshot = await getDocs(query(companiesCollection, limit(10)));
+
 
   //   const companiesData = companiesSnapshot.docs.map(doc => ({
   //     id: doc.id,
@@ -24,9 +27,12 @@ function App() {
   //   setCompanies(companiesData);
   // };
 
-  // useEffect(() => {
-  //   fetchCompanies();
-  // }, []);
+
+
+  useEffect(() => {
+    fetchCompanies();
+  }, []);
+
 
   return (
     <div className="App">
@@ -36,12 +42,12 @@ function App() {
           {/* <PopupComponent fetchCompanies={fetchCompanies} /> */}
           <PopupComponent />
           <h4 className='p-4 font-semibold text-xl text-left'>or</h4>
-          {/* <ExcelFileUploader companies={companies} /> */}
+
           <ExcelFileUploader />
         </div>
         <div className='w-full'>
-          {/* <SearchCompanies fetchCompanies={fetchCompanies} companiesData={companies} /> */}
-          <SearchCompanies />
+          <SearchCompanies fetchCompanies={fetchCompanies} />
+
         </div>
       </div>
       <hr />
