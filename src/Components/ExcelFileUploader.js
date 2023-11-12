@@ -25,9 +25,11 @@ function ExcelFileUploader({ companies }) {
           const batch = writeBatch(db);
 
           for (const row of sheetData) {
-            const companyAlreadyExist = companies.find(company => company.name === row.name);
+            const querySnapshot = await getDocs(query(collection(db, "companies"), where("name", "==", row.name)));
 
-            if (!companyAlreadyExist) {
+
+            if (querySnapshot.empty) {
+              console.log("Adding");
               const newDocRef = doc(collection(db, "companies"));
               const bycottString = row.boycott.toLowerCase();
               batch.set(newDocRef, {

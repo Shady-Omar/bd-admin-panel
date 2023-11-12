@@ -19,10 +19,12 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-
+const algoliasearch = require("algoliasearch");
 // Initialize Cloud Firestore and get a reference to the service
+const client = algoliasearch("TN5O68KSD4", "f76ef113b914bcd667803678a532c821");
+const algoliaIndex = client.initIndex("companies");
 const db = getFirestore(app);
 const auth = getAuth(app);
 const storage = getStorage(app);
 
-export { db, auth, storage };
+export { db, auth, storage, algoliaIndex };

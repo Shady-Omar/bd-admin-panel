@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { db } from '../firebase'
 import { collection, getDocs, query, where, doc, deleteDoc, updateDoc, onSnapshot, orderBy, startAfter, limit } from 'firebase/firestore';
 
-const PAGE_SIZE = 4; // Adjust the page size as needed
+const PAGE_SIZE = 15; // Adjust the page size as needed
 
 const TableComponent = (props) => {
   const [data, setData] = useState([]);
@@ -22,18 +22,7 @@ const TableComponent = (props) => {
   const [lastDocument, setLastDocument] = useState(null);
   const [hasMore, setHasMore] = useState(true);
 
-  // useEffect(() => {
-  //   const unsubscribe = onSnapshot(collection(db, 'companies'), (querySnapshot) => {
-  //     const documents = [];
-  //     querySnapshot.forEach((doc) => {
-  //       documents.push({ id: doc.id, ...doc.data() });
-  //     });
-  //     setData(documents);
-  //   });
-  
-  //   // Cleanup function to unsubscribe from the snapshot listener when the component unmounts
-  //   return () => unsubscribe();
-  // }, []);
+
 
   useEffect(() => {
     const q = query(collection(db, 'companies'), limit(PAGE_SIZE)); // Replace 'someField' with the field you want to order by
@@ -79,7 +68,7 @@ const TableComponent = (props) => {
 
     }
   };
-  
+
 
   const openModal = (item) => {
     setSelectedCompany(item);
@@ -101,7 +90,7 @@ const TableComponent = (props) => {
           const querySnapshot = await getDocs(
             query(collection(db, 'companies'), where('name', '==', name))
           );
-    
+
           if (querySnapshot.size === 0) {
             // No existing document with the same name found, proceed with the update
             await updateDoc(doc(db, 'companies', compID), {
@@ -120,7 +109,7 @@ const TableComponent = (props) => {
           console.error(error);
         }
       } else if (name === compName) {
-        
+
         try {
           console.log(name);
           console.log(compName);
@@ -139,7 +128,7 @@ const TableComponent = (props) => {
         }
 
       }
-      
+
     }
   };
 
@@ -156,7 +145,7 @@ const TableComponent = (props) => {
       } catch (error) {
         console.error(error);
       }
-      
+
     }
   }
 
@@ -173,12 +162,12 @@ const TableComponent = (props) => {
       } catch (error) {
         console.error(error);
       }
-      
+
     }
   }
 
   return (
-    <div className='flex flex-col items-center justify-center mt-5 w-full relative' style={{zIndex: '1'}}>
+    <div className='flex flex-col items-center justify-center mt-5 w-full relative' style={{ zIndex: '1' }}>
       <div className="relative overflow-x-auto shadow-md rounded-lg w-[95%]">
         <table className="w-full text-sm text-left text-gray-400 rounded-lg">
           <thead className="text-xs text-gray-400 uppercase bg-gray-700">
@@ -196,13 +185,13 @@ const TableComponent = (props) => {
                 Modify
               </th>
               <th scope="col" className="px-6 py-3">
-                
+
               </th>
             </tr>
           </thead>
           <tbody>
             {data.map((item) => (
-              <tr key={item.id} className="bg-gray-900" style={{borderBottom: '1px solid rgb(55 65 81)'}}>
+              <tr key={item.id} className="bg-gray-900" style={{ borderBottom: '1px solid rgb(55 65 81)' }}>
                 <th scope="row" className="px-6 py-4 font-medium text-white whitespace-nowrap">
                   {item.name}
                 </th>
@@ -223,7 +212,7 @@ const TableComponent = (props) => {
           </tbody>
         </table>
       </div>
-      
+
       <button onClick={loadMore} className="text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 my-5 transition-colors">Load More</button>
 
       {isModalOpen && selectedCompany && (

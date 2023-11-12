@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { db } from '../firebase';
-import { collection, getDocs, query, where, doc, deleteDoc, updateDoc } from 'firebase/firestore';
+import { db, algoliaIndex } from '../firebase';
+import { collection, getDocs, query, where, doc, getDoc, deleteDoc, updateDoc } from 'firebase/firestore';
 
 const SearchCompanies = (props) => {
   const [search, setSearch] = useState('');
@@ -21,17 +21,35 @@ const SearchCompanies = (props) => {
     setCompaniesData(props.companiesData);
   }, [props.companiesData]);
 
+  async function queryCompanies(searchText) {
+    let companiesData = [];
+    await algoliaIndex
+      .search(searchText, { hitsPerPage: 10 })
+      .then(async ({ hits }) => {
+        for (const hit of hits) {
+          try {
+            const docRef = doc(db, hit.path);
+            const docSnap = await getDoc(docRef);
+            companiesData = ([...companiesData, { id: docSnap.id, ...docSnap.data() }])
+          } catch (error) {
+            console.error('Error fetching document:', error);
+          }
+        }
+      })
+      .catch(err => {
+        console.log(`This is an error ${err}`);
+      });
+
+
+    return companiesData;
+  }
 
 
   const handleSearch = async (searchText) => {
     setSearch(searchText);
     if (searchText) {
-
-      function queryCompanies(searchText) {
-        return companiesData.filter(company => company.name.toString().toLowerCase().includes(searchText.toLowerCase()));
-      }
-
-      setSuggestions(queryCompanies(searchText));
+      const suggestions = await queryCompanies(searchText);
+      setSuggestions(suggestions);
     } else {
       setSuggestions([]);
     }

@@ -10,23 +10,7 @@ import { collection, getDocs } from 'firebase/firestore';
 
 function App() {
 
-  // const [companies, setCompanies] = useState([]);
 
-  // const fetchCompanies = async () => {
-  //   const companiesCollection = collection(db, 'companies');
-  //   const companiesSnapshot = await getDocs(companiesCollection);
-
-  //   const companiesData = companiesSnapshot.docs.map(doc => ({
-  //     id: doc.id,
-  //     ...doc.data()
-  //   }));
-
-  //   setCompanies(companiesData);
-  // };
-
-  // useEffect(() => {
-  //   fetchCompanies();
-  // }, []);
 
   return (
     <div className="App">
