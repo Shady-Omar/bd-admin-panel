@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../firebase'
-import { collection, getDocs, query, where, doc, deleteDoc, updateDoc, onSnapshot, orderBy, startAfter, limit } from 'firebase/firestore';
+import { collection, getDocs, query, where, doc, deleteDoc, updateDoc, onSnapshot, startAfter, limit } from 'firebase/firestore';
 
 const PAGE_SIZE = 15; // Adjust the page size as needed
 
@@ -45,29 +45,34 @@ const TableComponent = (props) => {
   const loadMore = async () => {
     if (lastDocument) {
       const q = query(collection(db, 'companies'), limit(PAGE_SIZE), startAfter(lastDocument));
-      const nextSnapshot = await getDocs(q);
-
-      const documents = [];
-      nextSnapshot.forEach((doc) => {
-        documents.push({ id: doc.id, ...doc.data() });
+  
+      const unsubscribe = onSnapshot(q, (querySnapshot) => {
+        const documents = [];
+        
+        querySnapshot.forEach((doc) => {
+          documents.push({ id: doc.id, ...doc.data() });
+        });
+  
+        setData((prevData) => [...prevData, ...documents]);
+  
+        // Set the last document for the next pagination
+        const lastVisible = querySnapshot.docs[querySnapshot.docs.length - 1];
+        setLastDocument(lastVisible);
+  
+        // Check if there are more documents to load
+        setHasMore(documents.length === PAGE_SIZE);
+  
+        // Log "done" to the console if there are no more documents to load
+        if (!hasMore) {
+          console.log('done');
+        }
       });
-
-      setData((prevData) => [...prevData, ...documents]);
-
-      // Set the last document for the next pagination
-      const lastVisible = nextSnapshot.docs[nextSnapshot.docs.length - 1];
-      setLastDocument(lastVisible);
-
-      // Check if there are more documents to load
-      setHasMore(documents.length === PAGE_SIZE);
-
-      // Log "done" to the console if there are no more documents to load
-      if (!hasMore) {
-        console.log('done');
-      }
-
+  
+      // Remember to store the unsubscribe function, so you can stop listening when needed
+      return () => unsubscribe();
     }
   };
+  
 
 
   const openModal = (item) => {
