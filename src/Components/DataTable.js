@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../firebase'
-import { collection, getDocs, query, where, doc, deleteDoc, updateDoc, onSnapshot } from 'firebase/firestore';
+import { collection, getDocs, query, where, doc, deleteDoc, updateDoc, onSnapshot, orderBy, startAfter, limit } from 'firebase/firestore';
+
+const PAGE_SIZE = 4; // Adjust the page size as needed
 
 const TableComponent = (props) => {
   const [data, setData] = useState([]);
@@ -16,18 +18,67 @@ const TableComponent = (props) => {
 
   const [compName, setCompName] = useState('');
 
+  // for Pagination:
+  const [lastDocument, setLastDocument] = useState(null);
+  const [hasMore, setHasMore] = useState(true);
+
+  // useEffect(() => {
+  //   const unsubscribe = onSnapshot(collection(db, 'companies'), (querySnapshot) => {
+  //     const documents = [];
+  //     querySnapshot.forEach((doc) => {
+  //       documents.push({ id: doc.id, ...doc.data() });
+  //     });
+  //     setData(documents);
+  //   });
+  
+  //   // Cleanup function to unsubscribe from the snapshot listener when the component unmounts
+  //   return () => unsubscribe();
+  // }, []);
+
   useEffect(() => {
-    const unsubscribe = onSnapshot(collection(db, 'companies'), (querySnapshot) => {
+    const q = query(collection(db, 'companies'), limit(PAGE_SIZE)); // Replace 'someField' with the field you want to order by
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
       const documents = [];
       querySnapshot.forEach((doc) => {
         documents.push({ id: doc.id, ...doc.data() });
       });
       setData(documents);
+
+      // Set the last document for pagination
+      const lastVisible = querySnapshot.docs[querySnapshot.docs.length - 1];
+      setLastDocument(lastVisible);
     });
-  
+
     // Cleanup function to unsubscribe from the snapshot listener when the component unmounts
     return () => unsubscribe();
   }, []);
+
+  const loadMore = async () => {
+    if (lastDocument) {
+      const q = query(collection(db, 'companies'), limit(PAGE_SIZE), startAfter(lastDocument));
+      const nextSnapshot = await getDocs(q);
+
+      const documents = [];
+      nextSnapshot.forEach((doc) => {
+        documents.push({ id: doc.id, ...doc.data() });
+      });
+
+      setData((prevData) => [...prevData, ...documents]);
+
+      // Set the last document for the next pagination
+      const lastVisible = nextSnapshot.docs[nextSnapshot.docs.length - 1];
+      setLastDocument(lastVisible);
+
+      // Check if there are more documents to load
+      setHasMore(documents.length === PAGE_SIZE);
+
+      // Log "done" to the console if there are no more documents to load
+      if (!hasMore) {
+        console.log('done');
+      }
+
+    }
+  };
   
 
   const openModal = (item) => {
@@ -127,7 +178,7 @@ const TableComponent = (props) => {
   }
 
   return (
-    <div className='flex justify-center mt-5 w-full relative' style={{zIndex: '1'}}>
+    <div className='flex flex-col items-center justify-center mt-5 w-full relative' style={{zIndex: '1'}}>
       <div className="relative overflow-x-auto shadow-md rounded-lg w-[95%]">
         <table className="w-full text-sm text-left text-gray-400 rounded-lg">
           <thead className="text-xs text-gray-400 uppercase bg-gray-700">
@@ -173,6 +224,8 @@ const TableComponent = (props) => {
         </table>
       </div>
       
+      <button onClick={loadMore} className="text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 my-5 transition-colors">Load More</button>
+
       {isModalOpen && selectedCompany && (
         <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50">
 
