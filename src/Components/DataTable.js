@@ -4,7 +4,7 @@ import { collection, getDocs, query, where, doc, deleteDoc, updateDoc, onSnapsho
 
 const PAGE_SIZE = 15; // Adjust the page size as needed
 
-const TableComponent = (props) => {
+const TableComponent = () => {
   const [data, setData] = useState([]);
 
 
@@ -45,31 +45,43 @@ const TableComponent = (props) => {
   const loadMore = async () => {
     if (lastDocument) {
       const q = query(collection(db, 'companies'), limit(PAGE_SIZE), startAfter(lastDocument));
+
+      // const unsubscribe = onSnapshot(q, (nextSnapshot) => {
+      //   const documents = [];
+      //   nextSnapshot.forEach((doc) => {
+      //     documents.push({ id: doc.id, ...doc.data() });
+      //   });
+      //   setData((prevData) => [...prevData, ...documents]);
   
-      const unsubscribe = onSnapshot(q, (querySnapshot) => {
-        const documents = [];
-        
-        querySnapshot.forEach((doc) => {
-          documents.push({ id: doc.id, ...doc.data() });
-        });
-  
-        setData((prevData) => [...prevData, ...documents]);
-  
-        // Set the last document for the next pagination
-        const lastVisible = querySnapshot.docs[querySnapshot.docs.length - 1];
-        setLastDocument(lastVisible);
-  
-        // Check if there are more documents to load
-        setHasMore(documents.length === PAGE_SIZE);
-  
-        // Log "done" to the console if there are no more documents to load
-        if (!hasMore) {
-          console.log('done');
-        }
+      //   // Set the last document for pagination
+      //   const lastVisible = nextSnapshot.docs[nextSnapshot.docs.length - 1];
+      //   setLastDocument(lastVisible);
+
+      //   setHasMore(documents.length === PAGE_SIZE);
+      // });
+
+
+      const nextSnapshot = await getDocs(q);
+
+      const documents = [];
+      nextSnapshot.forEach((doc) => {
+        documents.push({ id: doc.id, ...doc.data() });
       });
-  
-      // Remember to store the unsubscribe function, so you can stop listening when needed
-      return () => unsubscribe();
+
+      setData((prevData) => [...prevData, ...documents]);
+
+      // // Set the last document for the next pagination
+      const lastVisible = nextSnapshot.docs[nextSnapshot.docs.length - 1];
+      setLastDocument(lastVisible);
+
+      // Check if there are more documents to load
+      setHasMore(documents.length === PAGE_SIZE);
+      
+      // Log "done" to the console if there are no more documents to load
+      if (!hasMore) {
+        console.log('done');
+      }
+      // return () => unsubscribe();
     }
   };
   
@@ -104,7 +116,6 @@ const TableComponent = (props) => {
               url: url,
             });
             setIsModalOpen(false);
-            props.fetchCompanies();
             alert('Company Details Updated!');
           } else {
             // A document with the same name already exists, show an error message
@@ -116,17 +127,12 @@ const TableComponent = (props) => {
       } else if (name === compName) {
 
         try {
-          console.log(name);
-          console.log(compName);
-          console.log(boycott);
-
           await updateDoc(doc(db, 'companies', compID), {
             name: name,
             boycott: boycott === ('Yes' || 'yes') ? true : false,
             url: url,
           });
           setIsModalOpen(false);
-          props.fetchCompanies();
           alert('Company Details Updated!');
         } catch (error) {
           console.error(error);
@@ -144,7 +150,6 @@ const TableComponent = (props) => {
       try {
         await deleteDoc(doc(db, "companies", compID));
         setIsModalOpen(false);
-        props.fetchCompanies();
         alert('Company Deleted!');
         // window.location.reload()
       } catch (error) {

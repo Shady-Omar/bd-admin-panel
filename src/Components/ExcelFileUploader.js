@@ -5,7 +5,7 @@ import { collection, getDocs, query, where, writeBatch, doc } from "firebase/fir
 
 function ExcelFileUploader({ companies }) {
   const [fileData, setFileData] = useState(null);
-
+  const [infoMessage, setInfoMessage] = useState();
 
 
   const handleFileChange = async (event) => {
@@ -16,11 +16,12 @@ function ExcelFileUploader({ companies }) {
 
       reader.onload = async (e) => {
         try {
+          setInfoMessage(null);
           const data = e.target.result;
           const workbook = XLSX.read(data, { type: "binary" });
           const sheetName = workbook.SheetNames[0];
           const sheetData = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
-
+          console.log(sheetData);
           // Initialize a Firestore batch for batch writes
           const batch = writeBatch(db);
 
@@ -29,28 +30,31 @@ function ExcelFileUploader({ companies }) {
 
 
             if (querySnapshot.empty) {
-              console.log("Adding");
+              setInfoMessage(`Adding ${row.name}`);
               const newDocRef = doc(collection(db, "companies"));
               const bycottString = row.boycott.toLowerCase();
+              let urlString = '';
+              if (row.url) urlString = row.url;
               batch.set(newDocRef, {
                 name: row.name,
                 boycott: bycottString === 'yes' || row.boycott === 'نعم' ? true : false,
-                url: row.url,
+                url: urlString,
               });
             } else {
-              console.log(`Company with name "${row.name}" already exists. Skipping.`);
+              setInfoMessage(`Company with name "${row.name}" already exists. Skipping.`)
             }
           }
 
-          // Commit the batch to Firestore
           await batch.commit();
 
           setFileData(sheetData);
+          setInfoMessage(null);
           console.log("File Data as Object: ", sheetData);
           alert('Excel Sheet Data Added Successfully!');
           window.location.reload();
         } catch (error) {
           console.error("Error reading the file:", error);
+          setInfoMessage(`Error reading the file: ${error}`);
         }
       };
 
@@ -70,6 +74,8 @@ function ExcelFileUploader({ companies }) {
         onChange={handleFileChange}
         className="mt-2 border rounded p-2 w-[85%]"
       />
+      {infoMessage && <p className="mt-2" >{infoMessage}</p>}
+
     </div>
   );
 }
