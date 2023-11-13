@@ -45,22 +45,6 @@ const TableComponent = () => {
   const loadMore = async () => {
     if (lastDocument) {
       const q = query(collection(db, 'companies'), limit(PAGE_SIZE), startAfter(lastDocument));
-
-      // const unsubscribe = onSnapshot(q, (nextSnapshot) => {
-      //   const documents = [];
-      //   nextSnapshot.forEach((doc) => {
-      //     documents.push({ id: doc.id, ...doc.data() });
-      //   });
-      //   setData((prevData) => [...prevData, ...documents]);
-  
-      //   // Set the last document for pagination
-      //   const lastVisible = nextSnapshot.docs[nextSnapshot.docs.length - 1];
-      //   setLastDocument(lastVisible);
-
-      //   setHasMore(documents.length === PAGE_SIZE);
-      // });
-
-
       const nextSnapshot = await getDocs(q);
 
       const documents = [];
@@ -81,7 +65,6 @@ const TableComponent = () => {
       if (!hasMore) {
         console.log('done');
       }
-      // return () => unsubscribe();
     }
   };
   
